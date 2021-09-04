@@ -26,7 +26,9 @@ class QrackSystem:
 
     def __init__(self):
         shared_lib_path = "/usr/local/lib/libqrack_pinvoke.so"
-        if _platform == "linux" or _platform == "linux2":
+        if os.environ.get('PYQRACK_SHARED_LIB_PATH') != None:
+            shared_lib_path = os.environ.get('PYQRACK_SHARED_LIB_PATH')
+        elif _platform == "linux" or _platform == "linux2":
             machine = platform.machine()
             if machine == "armv71":
                 shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so.3.1"
@@ -42,8 +44,10 @@ class QrackSystem:
                 shared_lib_path = "qrack_lib\\Windows\\x86\\qrack_pinvoke.dll"
             else:
                 shared_lib_path = "qrack_lib\\Windows\\x86_64\\qrack_pinvoke.dll"
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        if shared_lib_path.startswith("/") or shared_lib_path[1:3] == ":\\":
+            basedir = ""
         try:
-            basedir = os.path.abspath(os.path.dirname(__file__))
             self.qrack_lib = CDLL(os.path.join(basedir, shared_lib_path))
         except Exception as e:
             print(e)

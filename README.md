@@ -15,4 +15,6 @@ Single and array "`b`" parameters represent [**Pauli operator bases**](https://e
 
 The package installation directory contains a `qrack_cl_precompile` folder with executables for supported platforms, to compile OpenCL kernels once, beforehand, avoiding the need to recompile "just-in-time" every time that you load this package in a Python interpreter. If you no longer want to use precompiled kernels, or if precompilation fails, just delete the `~/.qrack` directory, or the equivalent `.qrack` sub-directory in the user home folder of your operating system.
 
+To load the required **vm6502q/qrack** libraries from a different location, set the `PYQRACK_SHARED_LIB_PATH` environment variable. If an absolute path is set for this variable, it will be treated as an absolute path. If a relative path is used, the **pyqrack** package `qrack_system` directory is the root. For example, WebAssembly binaries included in the **pyqrack** package can be loaded with `export PYQRACK_SHARED_LIB_PATH="qrack_lib/WASM/libqrack_pinvoke.so.3.1"`. See the installed package content for other supported default build options.
+
 Please feel welcome to open an issue, if you'd like help. 😃
