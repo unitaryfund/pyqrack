@@ -1,0 +1,6 @@
+include MANIFEST.in
+include README.md
+recursive-include pyqrack *.so
+recursive-include pyqrack *.a
+recursive-include pyqrack qrack_cl_precompile
+recursive-include pyqrack qrack_cl_precompile.exe

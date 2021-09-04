@@ -15,18 +15,36 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE file or at https://opensource.org/licenses/MIT.
 
+import os
 from ctypes import *
-from sys import platform
+from sys import platform as _platform
+import platform
+import struct
 
 
 class QrackSystem:
 
     def __init__(self):
         shared_lib_path = "/usr/local/lib/libqrack_pinvoke.so"
-        if platform.startswith('win32'):
-            shared_lib_path = "C:\\Program Files\\Qrack\\bin\\qrack_pinvoke.dll"
+        if _platform == "linux" or _platform == "linux2":
+            machine = platform.machine()
+            if machine == "armv71":
+                shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so"
+            elif machine == "aarch64":
+                shared_lib_path = "qrack_lib/Linux/ARM64/libqrack_pinvoke.so"
+            else:
+                shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so"
+        elif _platform == "darwin":
+            shared_lib_path = "qrack_lib/Mac/x86_64/libqrack_pinvoke.so"
+        elif _platform == "win32":
+            struct_size = struct.calcsize("P") * 8
+            if struct_size == 32:
+                shared_lib_path = "qrack_lic\\Windows\\x86\\qrack_pinvoke.dll"
+            else:
+                shared_lib_path = "qrack_lic\\Windows\\x86_64\\qrack_pinvoke.dll"
         try:
-            self.qrack_lib = CDLL(shared_lib_path)
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            self.qrack_lib = CDLL(os.path.join(basedir, shared_lib_path))
         except Exception as e:
             print(e)
 
