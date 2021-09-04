@@ -3,7 +3,7 @@ Pure Python bindings for the pure C++11/OpenCL Qrack quantum computer simulator 
 
 (**PyQrack** is just pure Qrack.)
 
-To use this package, it's helpful to be familiar with [vm6502q/qrack](https://github.com/vm6502q/qrack).
+To use this package, it's helpful to be familiar with [vm6502q/qrack](https://github.com/vm6502q/qrack). Users gain **much** more control over options by building **vm6502q/qrack** and [vm6502q/pyqrack](https://github.com/vm6502q/pyqrack) from source. For advanced users, building from source is the intended primary method of **PyQrack** package distribution and use.
 
 Import and instantiate [`QrackSimulator`](https://github.com/vm6502q/pyqrack/blob/main/pyqrack/qrack_simulator.py) instances. This simulator can perform arbitrary single qubit and controlled-single-qubit gates, as well as other specific gates like `SWAP`.
 
