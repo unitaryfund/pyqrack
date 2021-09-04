@@ -39,9 +39,9 @@ class QrackSystem:
         elif _platform == "win32":
             struct_size = struct.calcsize("P") * 8
             if struct_size == 32:
-                shared_lib_path = "qrack_lic\\Windows\\x86\\qrack_pinvoke.dll"
+                shared_lib_path = "qrack_lib\\Windows\\x86\\qrack_pinvoke.dll"
             else:
-                shared_lib_path = "qrack_lic\\Windows\\x86_64\\qrack_pinvoke.dll"
+                shared_lib_path = "qrack_lib\\Windows\\x86_64\\qrack_pinvoke.dll"
         try:
             basedir = os.path.abspath(os.path.dirname(__file__))
             self.qrack_lib = CDLL(os.path.join(basedir, shared_lib_path))
