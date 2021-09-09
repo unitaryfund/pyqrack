@@ -31,13 +31,13 @@ class QrackSystem:
         elif _platform == "linux" or _platform == "linux2":
             machine = platform.machine()
             if machine == "armv71":
-                shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so.3.1"
+                shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so.6.2.0"
             elif machine == "aarch64":
-                shared_lib_path = "qrack_lib/Linux/ARM64/libqrack_pinvoke.so.3.1"
+                shared_lib_path = "qrack_lib/Linux/ARM64/libqrack_pinvoke.so.6.2.0"
             else:
-                shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so.3.1"
+                shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so.6.2.0"
         elif _platform == "darwin":
-            shared_lib_path = "qrack_lib/Mac/x86_64/libqrack_pinvoke.3.1.dylib"
+            shared_lib_path = "qrack_lib/Mac/x86_64/libqrack_pinvoke.6.2.0.dylib"
         elif _platform == "win32":
             struct_size = struct.calcsize("P") * 8
             if struct_size == 32:
@@ -288,6 +288,65 @@ class QrackSystem:
 
         self.qrack_lib.IQFT.resType = None
         self.qrack_lib.IQFT.argTypes = [c_uint, c_uint, POINTER(c_uint)]
+
+        # Arithmetic-Logic-Unit (ALU)
+
+        self.qrack_lib.ADD.resType = None
+        self.qrack_lib.ADD.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint)]
+
+        self.qrack_lib.SUB.resType = None
+        self.qrack_lib.SUB.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint)]
+
+        self.qrack_lib.ADDS.resType = None
+        self.qrack_lib.ADDS.argTypes = [c_uint, c_uint, c_uint, c_uint, POINTER(c_uint)]
+
+        self.qrack_lib.SUBS.resType = None
+        self.qrack_lib.SUBS.argTypes = [c_uint, c_uint, c_uint, c_uint, POINTER(c_uint)]
+
+        self.qrack_lib.MUL.resType = None
+        self.qrack_lib.MUL.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.DIV.resType = None
+        self.qrack_lib.DIV.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.MULN.resType = None
+        self.qrack_lib.MULN.argTypes = [c_uint, c_uint, c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.DIVN.resType = None
+        self.qrack_lib.DIVN.argTypes = [c_uint, c_uint, c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.POWN.resType = None
+        self.qrack_lib.POWN.argTypes = [c_uint, c_uint, c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.MCADD.resType = None
+        self.qrack_lib.MCADD.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint)]
+
+        self.qrack_lib.MCSUB.resType = None
+        self.qrack_lib.MCSUB.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint)]
+
+        self.qrack_lib.MCMUL.resType = None
+        self.qrack_lib.MCMUL.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.MCDIV.resType = None
+        self.qrack_lib.MCDIV.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.MCMULN.resType = None
+        self.qrack_lib.MCMULN.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.MCDIVN.resType = None
+        self.qrack_lib.MCDIVN.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.MCPOWN.resType = None
+        self.qrack_lib.MCPOWN.argTypes = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, c_uint, POINTER(c_uint), POINTER(c_uint)]
+
+        self.qrack_lib.LDA.resType = None
+        self.qrack_lib.LDA.argType = [c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint), POINTER(c_ubyte)]
+
+        self.qrack_lib.ADC.resType = None
+        self.qrack_lib.ADC.argType = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint), POINTER(c_ubyte)]
+
+        self.qrack_lib.SBC.resType = None
+        self.qrack_lib.SBC.argType = [c_uint, c_uint, c_uint, POINTER(c_uint), c_uint, POINTER(c_uint), POINTER(c_ubyte)]
 
         # miscellaneous
 
