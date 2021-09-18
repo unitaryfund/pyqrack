@@ -47,7 +47,7 @@ class QrackSystem:
                 shared_lib_path = "qrack_lib\\Windows\\x86_64\\qrack_pinvoke.dll"
         else:
             print("No Qrack binary for your platform, attempting to use /usr/local/lib/libqrack_pinvoke.so")
-            print("You can choose the binary directory to load from with the environment variable: PYQRACK_SHARED_LIB_PATH")
+            print("You can choose the binary file to load with the environment variable: PYQRACK_SHARED_LIB_PATH")
 
         basedir = os.path.abspath(os.path.dirname(__file__))
         if shared_lib_path.startswith("/") or shared_lib_path[1:3] == ":\\":
