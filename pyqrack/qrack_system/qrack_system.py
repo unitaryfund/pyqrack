@@ -30,10 +30,11 @@ class QrackSystem:
             shared_lib_path = os.environ.get('PYQRACK_SHARED_LIB_PATH')
         elif _platform == "linux" or _platform == "linux2":
             machine = platform.machine()
-            if machine == "armv71":
+            if machine == "armv7l":
                 shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so.6.2.0"
             elif machine == "aarch64":
-                shared_lib_path = "qrack_lib/Linux/ARM64/libqrack_pinvoke.so.6.2.0"
+                print("No Qrack binary for ARM64 platform, attempting to use /usr/local/lib/libqrack_pinvoke.so")
+                shared_lib_path = "/usr/local/lib/libqrack_pinvoke.so"
             else:
                 shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so.6.2.0"
         elif _platform == "darwin":
