@@ -31,14 +31,16 @@ class QrackSystem:
         elif _platform == "linux" or _platform == "linux2":
             machine = platform.machine()
             if machine == "armv7l":
-                shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so.6.2.0"
+                shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so"
             elif machine == "aarch64":
                 print("No Qrack binary for ARM64 platform, attempting to use /usr/local/lib/libqrack_pinvoke.so")
                 shared_lib_path = "/usr/local/lib/libqrack_pinvoke.so"
             else:
-                shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so.6.2.0"
+                shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so"
         elif _platform == "darwin":
-            shared_lib_path = "qrack_lib/Mac/x86_64/libqrack_pinvoke.6.2.0.dylib"
+            text_file = open("qrack_lib/Mac/x86_64/libqrack_pinvoke.dylib", "r")
+            shared_lib_path = "qrack_lib/Mac/x86_64/" + text_file.read()
+            text_file.close()
         elif _platform == "win32":
             struct_size = struct.calcsize("P") * 8
             if struct_size == 32:
