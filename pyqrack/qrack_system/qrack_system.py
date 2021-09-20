@@ -38,9 +38,7 @@ class QrackSystem:
             else:
                 shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so"
         elif _platform == "darwin":
-            text_file = open("qrack_lib/Mac/x86_64/libqrack_pinvoke.dylib", "r")
-            shared_lib_path = "qrack_lib/Mac/x86_64/" + text_file.read()
-            text_file.close()
+            shared_lib_path = "qrack_lib/Mac/x86_64/libqrack_pinvoke.6.2.0.dylib"
         elif _platform == "win32":
             struct_size = struct.calcsize("P") * 8
             if struct_size == 32:
