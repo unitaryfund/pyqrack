@@ -13,7 +13,7 @@ class QrackSimulator:
 
     # non-quantum
 
-    def __init__(self, qubitCount=-1, cloneSid=-1, pyzxCircuit=None):
+    def __init__(self, qubitCount=-1, cloneSid=-1, isMultiDevice=True, isSchmidtDecompose=True, isStabilizerHybrid=True, is1QbFusion=True, isCpuGpuHybrid=True, pyzxCircuit=None):
         self.sid = None
 
         if pyzxCircuit is not None:
@@ -23,10 +23,10 @@ class QrackSimulator:
             raise RuntimeError('Cannot clone a QrackSimulator and specify its qubit length at the same time, in QrackSimulator constructor!')
         if cloneSid > -1:
             self.sid = Qrack.qrack_lib.init_clone(cloneSid)
-        elif qubitCount > 0:
-            self.sid = Qrack.qrack_lib.init_count(qubitCount)
         else:
-            self.sid = Qrack.qrack_lib.init()
+            if qubitCount < 0:
+                qubitCount = 0
+            self.sid = Qrack.qrack_lib.init_count(qubitCount, isMultiDevice, isSchmidtDecompose, isStabilizerHybrid, is1QbFusion, isCpuGpuHybrid)
 
         if pyzxCircuit is not None:
             self.run_pyzx_gates(pyzxCircuit.gates)
