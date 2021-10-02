@@ -1,7 +1,7 @@
 #Adapted from https://github.com/Qiskit/qiskit-aer/blob/master/setup.py
 
 import os
-from distutils.core import setup
+from setuptools import setup
 
 
 requirements = []
