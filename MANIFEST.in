@@ -3,5 +3,6 @@ include README.md
 recursive-include pyqrack *.so
 recursive-include pyqrack *.so.*
 recursive-include pyqrack *.a
+recursive-include pyqrack *.dylib
 recursive-include pyqrack qrack_cl_precompile
 recursive-include pyqrack qrack_cl_precompile.exe
