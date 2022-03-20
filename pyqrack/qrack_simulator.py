@@ -26,6 +26,7 @@ class QrackSimulator:
         else:
             if qubitCount < 0:
                 qubitCount = 0
+
             if isSchmidtDecompose and isStabilizerHybrid and not isBinaryDecisionTree and isPaged and is1QbFusion and isCpuGpuHybrid and isOpenCL:
                 if isSchmidtDecomposeMulti:
                     self.sid = Qrack.qrack_lib.init_count(qubitCount, isHostPointer)
@@ -33,6 +34,9 @@ class QrackSimulator:
                     self.sid = Qrack.qrack_lib.init_count_pager(qubitCount, isHostPointer)
             else:
                 self.sid = Qrack.qrack_lib.init_count_type(qubitCount, isSchmidtDecomposeMulti, isSchmidtDecompose, isStabilizerHybrid, isBinaryDecisionTree, isPaged, is1QbFusion, isCpuGpuHybrid, isOpenCL, isHostPointer)
+
+        if self.get_error() != 0:
+            raise Exception("QrackSimulator C++ library raised exception.")
 
         if pyzxCircuit is not None:
             self.run_pyzx_gates(pyzxCircuit.gates)
