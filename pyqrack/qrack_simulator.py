@@ -13,7 +13,7 @@ class QrackSimulator:
 
     # non-quantum
 
-    def __init__(self, qubitCount=-1, cloneSid=-1, isSchmidtDecomposeMulti=True, isSchmidtDecompose=True, isStabilizerHybrid=True, isBinaryDecisionTree=False, isPaged=True, is1QbFusion=True, isCpuGpuHybrid=True, isOpenCL=True, isHostPointer=False, pyzxCircuit=None):
+    def __init__(self, qubitCount=-1, cloneSid=-1, isSchmidtDecomposeMulti=True, isSchmidtDecompose=True, isStabilizerHybrid=True, isBinaryDecisionTree=False, is1QbFusion=False, isPaged=True, isCpuGpuHybrid=True, isOpenCL=True, isHostPointer=False, pyzxCircuit=None):
         self.sid = None
 
         if pyzxCircuit is not None:
@@ -27,7 +27,7 @@ class QrackSimulator:
             if qubitCount < 0:
                 qubitCount = 0
 
-            if isSchmidtDecompose and isStabilizerHybrid and not isBinaryDecisionTree and isPaged and is1QbFusion and isCpuGpuHybrid and isOpenCL:
+            if isSchmidtDecompose and isStabilizerHybrid and not isBinaryDecisionTree and not is1QbFusion and isPaged and isCpuGpuHybrid and isOpenCL:
                 if isSchmidtDecomposeMulti:
                     self.sid = Qrack.qrack_lib.init_count(qubitCount, isHostPointer)
                 else:
@@ -286,6 +286,23 @@ class QrackSimulator:
 
     def multiplex1_mtrx(self, c, q, m):
         Qrack.qrack_lib.Multiplex1Mtrx(self.sid, len(c), self._uint_byref(c), q, self._complex_byref(m))
+        if self.get_error() != 0:
+            raise Exception("QrackSimulator C++ library raised exception.")
+
+    # coalesced single qubit gates
+
+    def mx(self, q):
+        Qrack.qrack_lib.MX(self.sid, len(q), self._uint_byref(q))
+        if self.get_error() != 0:
+            raise Exception("QrackSimulator C++ library raised exception.")
+
+    def my(self, q):
+        Qrack.qrack_lib.MY(self.sid, len(q), self._uint_byref(q))
+        if self.get_error() != 0:
+            raise Exception("QrackSimulator C++ library raised exception.")
+
+    def mz(self, q):
+        Qrack.qrack_lib.MZ(self.sid, len(q), self._uint_byref(q))
         if self.get_error() != 0:
             raise Exception("QrackSimulator C++ library raised exception.")
 
