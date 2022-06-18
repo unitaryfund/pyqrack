@@ -1,4 +1,4 @@
-#Adapted from https://github.com/Qiskit/qiskit-aer/blob/master/setup.py
+# Adapted from https://github.com/Qiskit/qiskit-aer/blob/master/setup.py
 
 import os
 from setuptools import setup
@@ -6,11 +6,10 @@ from setuptools import setup
 
 requirements = []
 
-VERSION = "0.17.3"
+VERSION = "0.17.4"
 
 # Read long description from README.
-README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                           'README.md')
+README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md')
 with open(README_PATH) as readme_file:
     README = readme_file.read()
 
@@ -43,5 +42,5 @@ setup(
     install_requires=requirements,
     setup_requires=[],
     include_package_data=True,
-    zip_safe=False
+    zip_safe=False,
 )
