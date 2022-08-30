@@ -17,6 +17,7 @@
 
 import os
 from ctypes import *
+from packaging import version
 from sys import platform as _platform
 import platform
 import struct
@@ -33,7 +34,7 @@ class QrackSystem:
                 shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so"
             elif machine == "aarch64":
                 shared_lib_path = "qrack_lib/Linux/ARM64/libqrack_pinvoke.so"
-            elif float(os.confstr('CS_GNU_LIBC_VERSION')[6:]) >= 2.35:
+            elif version.parse(os.confstr('CS_GNU_LIBC_VERSION')[6:]) >= version.parse("2.35"):
                 shared_lib_path = "qrack_lib/Linux/2_35/libqrack_pinvoke.so"
             else:
                 shared_lib_path = "qrack_lib/Linux/x86_64/libqrack_pinvoke.so"
