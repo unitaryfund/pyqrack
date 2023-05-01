@@ -7,6 +7,7 @@ import ctypes
 import sys
 
 from .qrack_system import Qrack
+from .neuron_activation_fn import NeuronActivationFn
 
 class QrackNeuron:
     """Class that exposes the QNeuron class of Qrack
@@ -44,12 +45,16 @@ class QrackNeuron:
         simulator,
         controls,
         target,
+        activation_fn = NeuronActivationFn.Sigmoid,
+        alpha = 1.0,
         tolerance = sys.float_info.epsilon,
         _init = True
     ):
         self.simulator = simulator
         self.controls = controls
         self.target = target
+        self.activation_fn = activation_fn
+        self.alpha = alpha
         self.tolerance = tolerance
 
         self.amp_count = 1 << (len(controls) + 1)
@@ -57,7 +62,7 @@ class QrackNeuron:
         if not _init:
             return
 
-        self.nid = Qrack.qrack_lib.init_qneuron(simulator.sid, len(controls), self._ulonglong_byref(controls), target, tolerance)
+        self.nid = Qrack.qrack_lib.init_qneuron(simulator.sid, len(controls), self._ulonglong_byref(controls), target, activation_fn, alpha, tolerance)
 
         self._throw_if_error()
 
@@ -75,7 +80,7 @@ class QrackNeuron:
         Raises:
             RuntimeError: QrackNeuron C++ library raised an exception.
         """
-        result = QrackNeuron(self.simulator, self.controls, self.target, self.tolerance)
+        result = QrackNeuron(self.simulator, self.controls, self.target, self.activation_fn, self.alpha, self.tolerance)
         self.nid = Qrack.qrack_lib.clone_qneuron(self.simulator.sid)
         self._throw_if_error()
         return result
@@ -89,7 +94,7 @@ class QrackNeuron:
             return (ctypes.c_float * len(a))(*a)
         return (ctypes.c_double * len(a))(*a)
 
-    def set_qneuron_angles(self, a):
+    def set_angles(self, a):
         """Directly sets the neuron parameters.
 
         Set all synaptic parameters of the neuron directly, by a list
@@ -104,7 +109,7 @@ class QrackNeuron:
         Qrack.qrack_lib.set_qneuron_angles(self.nid, self._real1_byref(a))
         self._throw_if_error()
 
-    def get_qneuron_angles(self):
+    def get_angles(self):
         """Directly gets the neuron parameters.
 
         Get all synaptic parameters of the neuron directly, as a list
@@ -118,6 +123,35 @@ class QrackNeuron:
         if self._get_error() != 0:
             raise RuntimeError("QrackSimulator C++ library raised exception.")
         return list(ket)
+
+    def set_alpha(self, a):
+        """Set the neuron 'alpha' parameter.
+
+        To enable nonlinear activation, `QrackNeuron` has an 'alpha'
+        parameter that is applied as a power to its angles, before
+        learning and prediction. This makes the activation function
+        sharper (or less sharp).
+
+        Raises:
+            RuntimeError: QrackNeuron C++ library raised an exception.
+        """
+        self.alpha = a
+        Qrack.qrack_lib.set_qneuron_alpha(self.nid, a)
+        self._throw_if_error()
+
+    def set_activation_fn(self, f):
+        """Sets the activation function of this QrackNeuron
+
+        Nonlinear activation functions can be important to neural net
+        applications, like DNN. The available activation functions are
+        enumerated in `NeuronActivationFn`. 
+
+        Raises:
+            RuntimeError: QrackNeuron C++ library raised an exception.
+        """
+        self.activation_fn = f
+        Qrack.qrack_lib.set_qneuron_activation_fn(self.nid, f)
+        self._throw_if_error()
 
     def predict(self, e=True, r=True):
         """Predict based on training
