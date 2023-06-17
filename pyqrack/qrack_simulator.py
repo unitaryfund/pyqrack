@@ -2364,6 +2364,59 @@ class QrackSimulator:
         Qrack.qrack_lib.SetTInjection(self.sid, iti)
         self._throw_if_error()
 
+    def set_hardware_encoded(self, she):
+        """Set option to encode t-gadgets for hardware
+
+        If t-injection is on, and we output a stabilizer state to file,
+        this option turns on auxiliary error correction channels, if true,
+        allowing ancilla syndrome correction with mid-ciruit measurement
+        instead of post selection.
+        Note that this encoding option is off by default.
+
+        Args:
+            she: use "stabilizer hardware encoding"
+
+        Raises:
+            RuntimeError: QrackSimulator raised an exception.
+        """
+        Qrack.qrack_lib.SetStabilizerHardwareEncoded(self.sid, she)
+        self._throw_if_error()
+
+    def out_to_file(self, filename):
+        """Output state to file (stabilizer only!)
+
+        Outputs the hybrid stabilizer state to file.
+
+        Args:
+            filename: Name of file
+        """
+        Qrack.qrack_lib.qstabilizer_out_to_file(self.sid, filename.encode('utf-8'))
+        self._throw_if_error()
+
+    def in_from_file(filename, is_binary_decision_tree = False, is_paged = True, is_cpu_gpu_hybrid = True, is_opencl = True, is_host_pointer = False):
+        """Input state from file (stabilizer only!)
+
+        Reads in a hybrid stabilizer state from file.
+
+        Args:
+            filename: Name of file
+        """
+        out = QrackSimulator(
+            qubitCount=1,
+            isSchmidtDecomposeMulti=False,
+            isSchmidtDecompose=False,
+            isStabilizerHybrid=True,
+            isBinaryDecisionTree=is_binary_decision_tree,
+            isPaged=is_paged,
+            isCpuGpuHybrid=is_cpu_gpu_hybrid,
+            isOpenCL=is_opencl,
+            isHostPointer=is_host_pointer
+        )
+        Qrack.qrack_lib.qstabilizer_in_from_file(out.sid, filename.encode('utf-8'))
+        out._throw_if_error()
+
+        return out
+
     def _apply_pyzx_op(self, gate):
         if gate.name == "XPhase":
             self.r(Pauli.PauliX, math.pi * gate.phase, gate.target)
