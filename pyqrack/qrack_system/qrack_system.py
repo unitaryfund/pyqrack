@@ -117,19 +117,6 @@ class QrackSystem:
             c_bool,
             c_bool,
             c_bool,
-            c_bool
-        ]
-
-        self.qrack_lib.init_count_type.restype = c_ulonglong
-        self.qrack_lib.init_count_type.argtypes = [
-            c_ulonglong,
-            c_bool,
-            c_bool,
-            c_bool,
-            c_bool,
-            c_bool,
-            c_bool,
-            c_bool,
             c_bool,
             c_bool
         ]
@@ -1021,6 +1008,9 @@ class QrackSystem:
 
         self.qrack_lib.qcircuit_inverse.restype = c_ulonglong
         self.qrack_lib.qcircuit_inverse.argtypes = [c_ulonglong]
+
+        self.qrack_lib.qcircuit_past_light_cone.restype = c_ulonglong
+        self.qrack_lib.qcircuit_past_light_cone.argtypes = [c_ulonglong, c_ulonglong, POINTER(c_ulonglong)]
 
         self.qrack_lib.destroy_qcircuit.restype = None
         self.qrack_lib.destroy_qcircuit.argtypes = [c_ulonglong]
