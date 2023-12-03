@@ -1,3 +1,9 @@
+pyqrack (1.24.5) bionic; urgency=medium
+
+  * Change debhelper-compat version
+
+ -- Daniel Strano <dan@unitary.fund>  Sun, 03 Dec 2023 16:54:22 -0500
+
 pyqrack (1.24.4) jammy; urgency=medium
 
   * First Ubuntu release! (Jammy, 3/3)
