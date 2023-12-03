@@ -1,7 +1,7 @@
 Source: pyqrack
 Priority: optional
 Maintainer: Daniel Strano <dan@unitary.fund>
-Build-Depends: debhelper-compat (= 12),dh-python,python3-all,python3-setuptools,libqrack
+Build-Depends: debhelper-compat (= 12),dh-python,python3-all,python3-setuptools,libqrack-dev
 Standards-Version: 4.4.1
 X-Python3-Version: >= 3.6
 Section: libs
@@ -10,7 +10,6 @@ Homepage: https://github.com/unitaryfund/pyqrack
 Package: pyqrack
 Architecture: any
 Multi-Arch: same
-Built-Using: debhelper-compat (= 12),dh-python,python3-all,python3-setuptools,libqrack
-Depends: ${python3:Depends},libqrack
+Depends: ${python3:Depends},${misc:Depends},libqrack-dev
 Description: unitaryfund/qrack quantum computer simulator Python wrapper
  unitaryfund/qrack (or vm6502q/qrack) quantum computer simulator Python wrapper
