@@ -1,0 +1,5 @@
+pyqrack (1.24.1) bionic; urgency=medium
+
+  * First Debian release! (Bionic, 1/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Sun, 03 Dec 2023 13:19:31 -0500
