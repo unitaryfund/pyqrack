@@ -1,3 +1,9 @@
+pyqrack (1.26.4) bionic; urgency=medium
+
+  * "Foolproof" reactive separation and multi-GPU defaults (Bionic 3/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Sun, 18 Feb 2024 16:49:39 -0500
+
 pyqrack (1.26.3) jammy; urgency=medium
 
   * "Foolproof" reactive separation and multi-GPU defaults (Jammy 2/3)
