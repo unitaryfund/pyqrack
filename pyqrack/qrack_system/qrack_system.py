@@ -25,7 +25,7 @@ import struct
 
 class QrackSystem:
     def __init__(self):
-        shared_lib_path = "/usr/lib/qrack/libqrack_pinvoke.so"
+        shared_lib_path = "/usr/local/lib/qrack/libqrack_pinvoke.so"
         if os.environ.get('PYQRACK_SHARED_LIB_PATH') != None:
             shared_lib_path = os.environ.get('PYQRACK_SHARED_LIB_PATH')
         elif _platform == "linux" or _platform == "linux2":
