@@ -1,16 +1,4 @@
-pyqrack (1.26.2) UNRELEASED; urgency=medium
-
-  * "Foolproof" reactive separation and multi-GPU defaults (Focal 1/3)
-
- -- Daniel Strano <dan@unitary.fund>  Sun, 18 Feb 2024 16:35:27 -0500
-
-pyqrack (1.26.1) jammy; urgency=medium
-
-  * "Foolproof" reactive separation and multi-GPU defaults (Focal 1/3)
-
- -- Daniel Strano <dan@unitary.fund>  Sun, 18 Feb 2024 15:37:58 -0500
-
-pyqrack (1.26.0) focal; urgency=medium
+pyqrack (1.26.2) focal; urgency=medium
 
   * "Foolproof" reactive separation and multi-GPU defaults (Focal 1/3)
 
