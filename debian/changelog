@@ -1,3 +1,9 @@
+pyqrack (1.26.9) jammy; urgency=medium
+
+  * Bind SetNcrp() for near-Clifford (Jammy 2/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Mon, 19 Feb 2024 16:41:55 -0500
+
 pyqrack (1.26.8) focal; urgency=medium
 
   * Bind SetNcrp() for near-Clifford (Focal 1/3)
