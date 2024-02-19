@@ -1,3 +1,9 @@
+pyqrack (1.26.6) jammy; urgency=medium
+
+  * Fix PyZX parsing (Jammy 2/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Mon, 19 Feb 2024 10:19:53 -0500
+
 pyqrack (1.26.5) focal; urgency=medium
 
   * Fix PyZX parsing (Focal 1/3)
