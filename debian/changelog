@@ -1,3 +1,9 @@
+pyqrack (1.26.14) focal; urgency=medium
+
+  * Fix QrackSimulator.file_to_optimized_qiskit_circuit() (Focal 2/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Tue, 20 Feb 2024 14:37:28 -0500
+
 pyqrack (1.26.13) bionic; urgency=medium
 
   * Fix QrackSimulator.file_to_optimized_qiskit_circuit() (Bionic 3/3)
