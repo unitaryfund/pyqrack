@@ -1,3 +1,9 @@
+pyqrack (1.26.15) jammy; urgency=medium
+
+  * Fix QrackSimulator.file_to_optimized_qiskit_circuit() (Jammy 3/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Tue, 20 Feb 2024 14:40:22 -0500
+
 pyqrack (1.26.14) focal; urgency=medium
 
   * Fix QrackSimulator.file_to_optimized_qiskit_circuit() (Focal 2/3)
