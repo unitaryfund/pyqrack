@@ -1,3 +1,9 @@
+pyqrack (1.26.11) focal; urgency=medium
+
+  * Fix QrackSimulator.file_to_optimized_qiskit_circuit() (Focal 1/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Tue, 20 Feb 2024 10:03:33 -0500
+
 pyqrack (1.26.10) bionic; urgency=medium
 
   * Bind SetNcrp() for near-Clifford (Bionic 3/)
