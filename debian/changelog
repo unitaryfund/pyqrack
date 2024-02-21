@@ -1,3 +1,9 @@
+pyqrack (1.26.17) jammy; urgency=medium
+
+  * Debug/optimize circuit loading (Jammy 2/3)
+
+ -- Daniel Strano <dan@unitary.fund>  Wed, 21 Feb 2024 07:18:16 -0500
+
 pyqrack (1.26.16) focal; urgency=medium
 
   * Debug/optimize circuit loading (Focal 1/3)
