@@ -1,6 +1,12 @@
+pyqrack (1.27.2) jammy; urgency=medium
+
+  * Minor bug fix for QrackNeuron.get_angles (Jammy 2/)
+
+ -- Daniel Strano <dan@unitary.fund>  Thu, 25 Apr 2024 11:17:59 -0400
+
 pyqrack (1.27.1) focal; urgency=medium
 
-  * Minor bug fix for QrackNeuron.get_angles (Jammy 1/3)
+  * Minor bug fix for QrackNeuron.get_angles (Focal 1/3)
 
  -- Daniel Strano <dan@unitary.fund>  Thu, 25 Apr 2024 10:51:35 -0400
 
