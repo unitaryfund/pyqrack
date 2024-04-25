@@ -1,4 +1,4 @@
-pyqrack (1.27.2) bionic; urgency=medium
+pyqrack (1.27.3) bionic; urgency=medium
 
   * Minor bug fix for QrackNeuron.get_angles (Bionic 3/3)
 
