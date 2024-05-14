@@ -1,3 +1,9 @@
+pyqrack (1.27.6) jammy; urgency=medium
+
+  * Restore default "hybrid stabilizer" (Jammy 2/4)
+
+ -- Daniel Strano <dan@unitary.fund>  Tue, 14 May 2024 08:32:18 -0400
+
 pyqrack (1.27.5) noble; urgency=medium
 
   * Restore default "hybrid stabilizer" (Noble 1/4)
