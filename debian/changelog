@@ -1,3 +1,9 @@
+pyqrack (1.27.5) noble; urgency=medium
+
+  * Restore default "hybrid stabilizer" (Noble 1/4)
+
+ -- Daniel Strano <dan@unitary.fund>  Tue, 14 May 2024 08:04:48 -0400
+
 pyqrack (1.27.4) noble; urgency=medium
 
   * First Noble Numbat release
