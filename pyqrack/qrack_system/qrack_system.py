@@ -34,6 +34,8 @@ class QrackSystem:
                 shared_lib_path = "qrack_lib/Linux/ARMv7/libqrack_pinvoke.so"
             elif machine == "aarch64":
                 shared_lib_path = "qrack_lib/Linux/ARM64/libqrack_pinvoke.so"
+            elif version.parse(os.confstr('CS_GNU_LIBC_VERSION')[6:]) >= version.parse("2.39"):
+                shared_lib_path = "qrack_lib/Linux/2_39/libqrack_pinvoke.so"
             elif version.parse(os.confstr('CS_GNU_LIBC_VERSION')[6:]) >= version.parse("2.35"):
                 shared_lib_path = "qrack_lib/Linux/2_35/libqrack_pinvoke.so"
             else:
