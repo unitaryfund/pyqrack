@@ -1,6 +1,12 @@
+pyqrack (1.28.3) focal; urgency=medium
+
+  * Expanded observables API (Focal 3/4)
+
+ -- Daniel Strano <dan@unitary.fund>  Thu, 23 May 2024 16:46:39 -0400
+
 pyqrack (1.28.2) jammy; urgency=medium
 
-  * Expanded observables API (Jammy 2/)
+  * Expanded observables API (Jammy 2/4)
 
  -- Daniel Strano <dan@unitary.fund>  Thu, 23 May 2024 16:43:33 -0400
 
