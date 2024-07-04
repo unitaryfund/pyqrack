@@ -22,25 +22,40 @@ from sys import platform as _platform
 
 class QrackSystem:
     def __init__(self):
-        shared_lib_path = "/usr/lib/qrack/libqrack_pinvoke.so"
+        shared_lib_path = ""
         if os.environ.get('PYQRACK_SHARED_LIB_PATH') != None:
             shared_lib_path = os.environ.get('PYQRACK_SHARED_LIB_PATH')
-        elif _platform == "darwin":
-            shared_lib_path = "/usr/local/lib/libqrack_pinvoke.dylib"
         elif _platform == "win32":
-            shared_lib_path = "C:\\Program Files\\Qrack\\bin\\qrack_pinvoke.dll"
-        elif _platform != "linux" and _platform != "linux2":
-            print(
-                "No Qrack binary for your platform, attempting to use /usr/lib/libqrack_pinvoke.so"
-            )
-            print(
-                "You can choose the binary file to load with the environment variable: PYQRACK_SHARED_LIB_PATH"
-            )
+            shared_lib_path = os.path.dirname(__file__) + "/qrack_lib/qrack_pinvoke.dll"
+        elif _platform == "darwin":
+            shared_lib_path = os.path.dirname(__file__) + "/qrack_lib/libqrack_pinvoke.dylib"
+        else:
+            shared_lib_path = os.path.dirname(__file__) + "/qrack_lib/libqrack_pinvoke.so"
 
         try:
             self.qrack_lib = CDLL(shared_lib_path)
         except Exception as e:
-            print(e)
+            if _platform == "win32":
+                shared_lib_path = "C:/Program Files/libqrack*/lib/qrack_pinvoke.lib"
+            elif _platform == "darwin":
+                shared_lib_path = "/usr/local/lib/qrack/libqrack_pinvoke.dylib"
+            else:
+                shared_lib_path = "/usr/local/lib/qrack/libqrack_pinvoke.so"
+
+            try:
+                self.qrack_lib = CDLL(shared_lib_path)
+            except Exception as e:
+                if _platform == "win32":
+                    shared_lib_path = "C:/Program Files (x86)/libqrack*/lib/qrack_pinvoke.lib"
+                elif _platform == "darwin":
+                    shared_lib_path = "/usr/lib/qrack/libqrack_pinvoke.dylib"
+                else:
+                    shared_lib_path = "/usr/lib/qrack/libqrack_pinvoke.so"
+
+                try:
+                    self.qrack_lib = CDLL(shared_lib_path)
+                except Exception as e:
+                    print(e)
 
         self.fppow = 5
         if "QRACK_FPPOW" in os.environ:
@@ -436,6 +451,14 @@ class QrackSystem:
         self.qrack_lib.PhaseParity.argtypes = [
             c_ulonglong,
             c_double,
+            c_ulonglong,
+            POINTER(c_ulonglong)
+        ]
+
+        self.qrack_lib.PhaseRootN.restype = None
+        self.qrack_lib.PhaseRootN.argtypes = [
+            c_ulonglong,
+            c_ulonglong,
             c_ulonglong,
             POINTER(c_ulonglong)
         ]
