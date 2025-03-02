@@ -15,9 +15,7 @@ _IS_QISKIT_AVAILABLE = True
 try:
     from qiskit.circuit.quantumcircuit import QuantumCircuit
     from qiskit.compiler import transpile
-    from qiskit.qobj.qasm_qobj import QasmQobjExperiment
     from qiskit.quantum_info.operators.symplectic.clifford import Clifford
-    from .util import convert_qiskit_circuit_to_qasm_experiment
 except ImportError:
     _IS_QISKIT_AVAILABLE = False
 
