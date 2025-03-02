@@ -21,15 +21,15 @@ def convert_qiskit_circuit_to_qasm_experiment(experiment, config=None, header=No
     instructions = []
     for datum in experiment._data:
         qubits = []
-        for qubit in datum[1]:
+        for qubit in datum.qubits:
             qubits.append(experiment.qubits.index(qubit))
 
         clbits = []
-        for clbit in datum[2]:
+        for clbit in datum.clbits:
             clbits.append(experiment.clbits.index(clbit))
 
         conditional = None
-        condition = datum[0].condition
+        condition = datum.operation._condition
         if condition is not None:
             if isinstance(condition[0], Clbit):
                 conditional = experiment.clbits.index(condition[0])
@@ -49,12 +49,12 @@ def convert_qiskit_circuit_to_qasm_experiment(experiment, config=None, header=No
 
         instructions.append(
             QasmQobjInstruction(
-                datum[0].name,
+                datum.operation.name,
                 qubits=qubits,
                 memory=clbits,
                 condition=condition,
                 conditional=conditional,
-                params=datum[0].params,
+                params=datum.operation.params,
             )
         )
 
