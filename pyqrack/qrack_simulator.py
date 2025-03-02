@@ -3890,7 +3890,6 @@ class QrackSimulator:
         measure_clbit = [clbit for clbit in sample_clbits]
 
         # Sample and convert to bit-strings
-        data = []
         if num_samples == 1:
             sample = self._sim.m_all()
             result = 0
@@ -3902,10 +3901,11 @@ class QrackSimulator:
         else:
             measure_results = self._sim.measure_shots([q._index for q in measure_qubit], num_samples)
 
+        data = []
         for sample in measure_results:
             for index in range(len(measure_qubit)):
                 qubit_outcome = (sample >> index) & 1
-                clbit = measure_clbit[index]
+                clbit = measure_clbit[index]._index
                 clmask = 1 << clbit
                 self._classical_memory = (self._classical_memory & (~clmask)) | (
                     qubit_outcome << clbit
