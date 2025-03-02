@@ -3263,7 +3263,7 @@ class QrackSimulator:
             non_clifford_gates.append(op)
             g = g + 1
 
-        basis_gates = ["rz", "h", "x", "y", "z", "sx", "sxdg", "sy", "sydg", "s", "sdg", "t", "tdg", "cx", "cy", "cz", "swap"]
+        basis_gates = ["rz", "h", "x", "y", "z", "sx", "sxdg", "s", "sdg", "t", "tdg", "cx", "cy", "cz", "swap"]
         try:
             circ = transpile(clifford_circ, basis_gates=basis_gates, optimization_level=2)
         except:
@@ -3335,7 +3335,7 @@ class QrackSimulator:
         sqrt_ni = np.sqrt(-1j)
         sqrt1_2 = 1 / math.sqrt(2)
         ident = np.eye(2, dtype=np.complex128)
-        # passable_gates = ["unitary", "rz", "h", "x", "y", "z", "sx", "sxdg", "sy", "sydg", "s", "sdg", "t", "tdg"]
+        # passable_gates = ["unitary", "rz", "h", "x", "y", "z", "sx", "sxdg", "s", "sdg", "t", "tdg"]
 
         passed_swaps = []
         for i in range(0, circ.width()):
@@ -3563,7 +3563,7 @@ class QrackSimulator:
                 circ.data.insert(j, copy.deepcopy(c.data[0]))
                 j -= 1
 
-        basis_gates=["u", "rz", "h", "x", "y", "z", "sx", "sxdg", "sy", "sydg", "s", "sdg", "t", "tdg", "cx", "cy", "cz", "swap"]
+        basis_gates=["u", "rz", "h", "x", "y", "z", "sx", "sxdg", "s", "sdg", "t", "tdg", "cx", "cy", "cz", "swap"]
         circ = transpile(circ, basis_gates=basis_gates, optimization_level=2)
 
         #Eliminate unused ancillae
