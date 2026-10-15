@@ -218,8 +218,8 @@ def _cpauli_lhv(prob, targ, axis, anti, theta=math.pi):
 class QrackAceBackend:
     """A back end for elided quantum error correction
 
-    This back end uses elided repetition code on a nearest-neighbor topology to emulate
-    a utility-scale superconducting chip quantum computer in very little memory.4
+    This back end uses elided repetition code on a nearest-neighbor topology (but fully-connected
+    within "patches") to emulate a utility-scale superconducting chip quantum computer in very little memory.
 
     The backend was originally designed assuming an (orbifolded) 2D qubit grid like 2019 Sycamore.
     However, it quickly became apparent that users can basically design their own connectivity topologies,
@@ -228,6 +228,9 @@ class QrackAceBackend:
     Consider distributing the different "patches" to different GPUs with self.sim[sim_id].set_device(gpu_id)!
     (If you have 3+ patches, maybe your discrete GPU can do multiple patches in the time it takes an Intel HD
     to do one patch worth of work!)
+
+    For expected XEB across different 2D nearest-neighbor experiments, see the data set, regression model,
+    and calculator at https://tinyurl.com/qrackacexeb.
 
     Attributes:
         sim(QrackSimulator): Array of simulators corresponding to "patches" between boundary rows.
