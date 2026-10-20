@@ -2209,14 +2209,58 @@ class QrackAceBackend:
             self.t(c1)
             self.adjt(c2)
             self.cx(c1, c2)
-        else:
-            self.correct(c1)
-            self.correct(c2)
 
-            for (b1, b2, bt) in witnesses:
-                self.sim[b1[0]].mcx([b1[1], b2[1]], bt[1])
+            return
 
-            self.correct(t)
+        anc_and = None
+        if self.is_error_detection and not self._in_gadget_capture and ((len(hqt) > 1) or (len(hq1) > 1) or (len(hq2) > 1)):
+            found = False
+            anc_sim = hq1[0][0]
+            t_sims = {y[0] for y in hqt if y[0] >= 0}
+            for x in hq1:
+                if (x[0] < 0) or (x[0] not in t_sims):
+                    continue
+                anc_sim = x[0]
+                for y in hq2:
+                    if (y[0] < 0) or (y[0] not in t_sims):
+                        continue
+                    if anc_sim == y[0]:
+                        found = True
+                        break
+                if found:
+                    break
+            anc_and = self.detect_ancilla_lq[anc_sim]
+            self.cx(t, anc_and)
+            c1_idx = next((r[1] for r in hq1 if r[0] == anc_sim), None)
+            c2_idx = next((r[1] for r in hq2 if r[0] == anc_sim), None)
+            if (c1_idx is not None) and (c2_idx is not None):
+                _, anc_and_idx = self.qubits[anc_and][0]
+                self.sim[anc_sim].mcx([c1_idx, c2_idx], anc_and_idx)
+            else:
+                self._in_gadget_capture = True
+                self.ccx(c1, c2, anc_and)
+                self._in_gadget_capture = False
+
+        self.correct(c1)
+        self.correct(c2)
+
+        for (b1, b2, bt) in witnesses:
+            self.sim[b1[0]].mcx([b1[1], b2[1]], bt[1])
+
+        self.correct(t)
+
+        if anc_and is not None:
+            self.cx(t, anc_and)
+            anc_sim, anc_idx = self.qubits[anc_and][0]
+            p = self.sim[anc_sim].prob(anc_idx)
+            p = 1.0 - p
+            if self._ps_epsilon >= p:
+                b = self.m(anc_and)
+            else:
+                b = self.force_m(anc_and, False)
+            if b:
+                self.x(anc_and)
+                self.x(t)
 
     def ccz(self, c1, c2, t):
         self.h(t)
