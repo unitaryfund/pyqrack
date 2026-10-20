@@ -2169,9 +2169,6 @@ class QrackAceBackend:
             self.mcx([c1, c2], t)
             return
 
-        self.correct(c1)
-        self.correct(c2)
-
         qb1, _ = QrackAceBackend._get_qb_lhv_indices(hq1)
         qb2, _ = QrackAceBackend._get_qb_lhv_indices(hq2)
         qbt, _ = QrackAceBackend._get_qb_lhv_indices(hqt)
@@ -2212,10 +2209,13 @@ class QrackAceBackend:
             self.adjt(c2)
             self.cx(c1, c2)
         else:
+            self.correct(c1)
+            self.correct(c2)
+
             for (b1, b2, bt) in witnesses:
                 self.sim[b1[0]].mcx([b1[1], b2[1]], bt[1])
 
-        self.correct(t)
+            self.correct(t)
 
     def ccz(self, c1, c2, t):
         self.h(t)
