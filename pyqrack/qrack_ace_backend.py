@@ -229,6 +229,14 @@ class QrackAceBackend:
     (If you have 3+ patches, maybe your discrete GPU can do multiple patches in the time it takes an Intel HD
     to do one patch worth of work!)
 
+    Raw state-vector qubits can be directly manipulated through "sim" and "qubits" properties (with boundary
+    "tie-breaker" local hidden variables qubits in "lhv"). "sim" entries in the "qubits" map expose the full
+    QrackSimulator gate API.
+
+    For irregularly shaped "cutout geometries," allocate a super set of the geometric layout with this class,
+    and simply do not use unneeded qubits (and strike them from the Qiskit coupling map, for transpilation).
+    Qrack will not allocate space for any qubit that never actually becomes involved in any entangling gate.
+
     For expected XEB across different 2D nearest-neighbor experiments, see the data set, regression model,
     and calculator at https://tinyurl.com/qrackacexeb.
 
@@ -363,7 +371,7 @@ class QrackAceBackend:
         # grows with total boundary-qubit count rather than patch count,
         # so it doesn't scale -- off by default, and worth turning on only
         # for a handful of patches. Every boundary qubit ALSO still gets
-        # its classical LHVQubit proxy (self._lhv, below) regardless, same
+        # its classical LHVQubit proxy (self.lhv, below) regardless, same
         # as when this option is off: with the crossbar on, the proxy
         # drops to being only the last-resort tie-breaker _correct() falls
         # back to when even the crossbar replica is itself ambiguous; with
@@ -372,8 +380,8 @@ class QrackAceBackend:
         boundary_sim_id = sim_count
         boundary_count = 0
 
-        self._qubits = []
-        self._lhv = {}
+        self.qubits = []
+        self.lhv = {}
         sim_counts = [0] * sim_count
         sim_id = 0
         tot_qubits = 0
@@ -391,9 +399,9 @@ class QrackAceBackend:
                         qubit.append((boundary_sim_id, boundary_count))
                         boundary_count += 1
 
-                    if (not to_clone) or (tot_qubits in to_clone._lhv):
-                        self._lhv[tot_qubits] = LHVQubit(
-                            to_clone=(to_clone._lhv[tot_qubits] if to_clone else None)
+                    if (not to_clone) or (tot_qubits in to_clone.lhv):
+                        self.lhv[tot_qubits] = LHVQubit(
+                            to_clone=(to_clone.lhv[tot_qubits] if to_clone else None)
                         )
 
                 if (not c) and (not r):
@@ -408,8 +416,8 @@ class QrackAceBackend:
                 if not c:
                     sim_id = (sim_id + 1) % sim_count
 
-                self._qubits.append(
-                    list(to_clone._qubits[tot_qubits]) if to_clone else qubit
+                self.qubits.append(
+                    list(to_clone.qubits[tot_qubits]) if to_clone else qubit
                 )
                 tot_qubits += 1
 
@@ -433,10 +441,10 @@ class QrackAceBackend:
         # See _apply_coupling for the actual gadget; this block only does
         # the qubit-index bookkeeping, in the same style as every other
         # per-simulator allocation above.
-        self._detect_ancilla = []
+        detect_ancilla = []
         if self.is_error_detection:
             for i in range(len(sim_counts)):
-                self._detect_ancilla.append(sim_counts[i])
+                detect_ancilla.append(sim_counts[i])
                 sim_counts[i] += 1
 
         # Logical-qubit wrapper around each patch's detection ancilla,
@@ -444,10 +452,10 @@ class QrackAceBackend:
         # (self.cx(lq1, anc)), not just raw (sim, idx) tuples. Appended
         # PAST the user-facing qubit range (num_qubits() is computed
         # independently from the grid dimensions, not from len(
-        # self._qubits), so these extra entries are never visible or
+        # self.qubits), so these extra entries are never visible or
         # reachable through the normal API) -- a simple, single-replica
         # (bulk-style) logical qubit per simulator, one entry in
-        # self._qubits pointing at the same physical qubit _detect_
+        # self.qubits pointing at the same physical qubit _detect_
         # ancilla already allocated there. See _apply_coupling for why
         # this needs to be a genuine logical qubit and not just a raw
         # physical capture: capturing lq1's LOGICAL value via a real,
@@ -457,12 +465,12 @@ class QrackAceBackend:
         # specific physical replica directly (an earlier version of
         # this) isn't a valid invariant, since _correct() can
         # legitimately need to change any single replica's own value.
-        self._detect_ancilla_lq = []
+        self.detect_ancilla_lq = []
         if self.is_error_detection:
-            for sim_id, phys_idx in enumerate(self._detect_ancilla):
-                lq_idx = len(self._qubits)
-                self._qubits.append([(sim_id, phys_idx)])
-                self._detect_ancilla_lq.append(lq_idx)
+            for sim_id, phys_idx in enumerate(detect_ancilla):
+                lq_idx = len(self.qubits)
+                self.qubits.append([(sim_id, phys_idx)])
+                self.detect_ancilla_lq.append(lq_idx)
         # Boundary repetition code, on-demand design: only the couplers
         # are actually noisy here -- single-qubit gates are already
         # exactly transversal, per-replica, with zero error, so there's
@@ -476,18 +484,18 @@ class QrackAceBackend:
         # See _cpauli for the actual encode/couple/decode/correct cycle
         # built around these; this block is just the qubit-index
         # bookkeeping, in the same style as _detect_ancilla above.
-        self._rep_code_ancilla = []
+        rep_code_ancilla = []
         if self.is_boundary_repetition_code:
             for i in range(len(sim_counts)):
-                self._rep_code_ancilla.append(sim_counts[i])
+                rep_code_ancilla.append(sim_counts[i])
                 sim_counts[i] += 1
 
-        self._rep_code_ancilla_lq = []
+        self.rep_code_ancilla_lq = []
         if self.is_boundary_repetition_code:
-            for sim_id, phys_idx in enumerate(self._rep_code_ancilla):
-                lq_idx = len(self._qubits)
-                self._qubits.append([(sim_id, phys_idx)])
-                self._rep_code_ancilla_lq.append(lq_idx)
+            for sim_id, phys_idx in enumerate(rep_code_ancilla):
+                lq_idx = len(self.qubits)
+                self.qubits.append([(sim_id, phys_idx)])
+                self.rep_code_ancilla_lq.append(lq_idx)
 
         # capture calls (see _apply_coupling): those calls go through
         # the ordinary _cpauli -> _apply_coupling path themselves, which
@@ -775,7 +783,7 @@ class QrackAceBackend:
         self._cx_shadow(c1, c2)
 
     def _unpack(self, lq):
-        return self._qubits[lq]
+        return self.qubits[lq]
 
     @staticmethod
     def _get_qb_lhv_indices(hq):
@@ -786,7 +794,7 @@ class QrackAceBackend:
         # diagonal-patch); with use_crossbars=True, 3 (home + adjacent-
         # patch + shared crossbar) or 5 (home + adjacent-patch + shared
         # crossbar + 2 diagonal-patch). None of them are virtual/LHV-
-        # backed slots -- the classical LHVQubit proxy (self._lhv) is
+        # backed slots -- the classical LHVQubit proxy (self.lhv) is
         # tracked entirely separately from hq, not as one of its indices
         # -- so qb is simply every index, in order, regardless of which
         # of those counts applies. We keep this helper's name and
@@ -881,8 +889,8 @@ class QrackAceBackend:
             for q in qb:
                 b = hq[q]
                 self.sim[b[0]].h(b[1])
-            if lq in self._lhv:
-                self._lhv[lq].h()
+            if lq in self.lhv:
+                self.lhv[lq].h()
 
         if len(hq) == 4:
             # Corner-boundary qubit: 4 real replicas remain (home,
@@ -897,7 +905,7 @@ class QrackAceBackend:
             p1 = self.sim[hq[1][0]].prob(hq[1][1])
             p2 = self.sim[hq[2][0]].prob(hq[2][1])
             p3 = self.sim[hq[3][0]].prob(hq[3][1])
-            lhv = self._lhv.get(lq)
+            lhv = self.lhv.get(lq)
 
             end_caps = [p0, p1, p2, p3]
             # Classify each end-cap as decisively high / decisively low /
@@ -1013,7 +1021,7 @@ class QrackAceBackend:
             p2 = self.sim[hq[2][0]].prob(hq[2][1])
             p3 = self.sim[hq[3][0]].prob(hq[3][1])
             p4 = self.sim[hq[4][0]].prob(hq[4][1])
-            lhv = self._lhv.get(lq)
+            lhv = self.lhv.get(lq)
 
             end_caps = [p0, p1, p3, p4]
             high_count = sum(1 for x in end_caps if x > (0.5 + self._epsilon))
@@ -1079,7 +1087,7 @@ class QrackAceBackend:
             p0 = self.sim[hq[0][0]].prob(hq[0][1])
             p1 = self.sim[hq[1][0]].prob(hq[1][1])
             p2 = self.sim[hq[2][0]].prob(hq[2][1])
-            lhv = self._lhv.get(lq)
+            lhv = self.lhv.get(lq)
 
             p1_high = p1 > (0.5 + self._epsilon)
             p1_low = p1 < (0.5 - self._epsilon)
@@ -1162,7 +1170,7 @@ class QrackAceBackend:
             # sit at old-index-2 is gone. The classical LHV proxy takes
             # over the crossbar's old role as "slot2" in the conditional
             # tie-breaking cascade below.
-            lhv = self._lhv.get(lq)
+            lhv = self.lhv.get(lq)
             p0 = self.sim[hq[0][0]].prob(hq[0][1])
             p1 = self.sim[hq[1][0]].prob(hq[1][1])
 
@@ -1295,8 +1303,8 @@ class QrackAceBackend:
             for q in qb:
                 b = hq[q]
                 self.sim[b[0]].h(b[1])
-            if lq in self._lhv:
-                self._lhv[lq].h()
+            if lq in self.lhv:
+                self.lhv[lq].h()
 
     def apply_magnetic_bias(self, q, b):
         if b == 0:
@@ -1325,7 +1333,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].u(b[1], th, ph, lm)
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.u(th, ph, lm)
 
@@ -1344,7 +1352,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].r(p, th, b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             if p == Pauli.PauliX:
                 lhv.rx(th)
@@ -1368,7 +1376,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].h(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.h()
 
@@ -1387,7 +1395,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].s(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.s()
 
@@ -1404,7 +1412,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].adjs(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.adjs()
 
@@ -1421,7 +1429,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].sx(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.sx()
 
@@ -1438,7 +1446,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].adjsx(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.adjsx()
 
@@ -1455,7 +1463,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].x(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.x()
 
@@ -1472,7 +1480,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].y(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.y()
 
@@ -1489,7 +1497,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].z(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.z()
 
@@ -1506,7 +1514,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].t(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.t()
 
@@ -1523,7 +1531,7 @@ class QrackAceBackend:
             b = hq[q]
             self.sim[b[0]].adjt(b[1])
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.adjt()
 
@@ -1628,7 +1636,7 @@ class QrackAceBackend:
                 if x[0] in t_sims:
                     anc_sim = x[0]
                     break
-            anc = self._detect_ancilla_lq[anc_sim]
+            anc = self.detect_ancilla_lq[anc_sim]
             self._in_gadget_capture = True
             # XOR on target
             self.cx(lq2, anc)
@@ -1684,7 +1692,7 @@ class QrackAceBackend:
                 # `(len(qb1) == 2) and (b1[1] == (b2[1] & 1))` as a
                 # parity-matched fallback. _get_qb_lhv_indices only ever
                 # returns length 1, 3, or 5 (bulk / edge-boundary /
-                # corner-boundary), matching self._qubits' own replica
+                # corner-boundary), matching self.qubits' own replica
                 # counts by construction -- len(qb1) == 2 is therefore
                 # unreachable, and that branch was permanently dead code
                 # (harmless, but confusing). Removed rather than kept:
@@ -1704,7 +1712,7 @@ class QrackAceBackend:
             self._in_gadget_capture = True
             # XOR check
             self.cx(lq2, anc)
-            anc_sim, anc_idx = self._qubits[anc][0]
+            anc_sim, anc_idx = self.qubits[anc][0]
             p = self.sim[anc_sim].prob(anc_idx)
             p = 1.0 - p
             if self._ps_epsilon >= p:
@@ -1756,7 +1764,7 @@ class QrackAceBackend:
                 if x[0] in t_sims:
                     anc_sim = x[0]
                     break
-            anc = self._rep_code_ancilla_lq[anc_sim]
+            anc = self.rep_code_ancilla_lq[anc_sim]
             self._in_gadget_capture = True
             self.cx(lq2, anc)
             self._in_gadget_capture = False
@@ -1772,9 +1780,9 @@ class QrackAceBackend:
             qb2, _ = QrackAceBackend._get_qb_lhv_indices(h2)
             self._apply_coupling(pauli, anti, qb1, hq1, qb2, h2, lq1_lr, lq1, l2)
 
-        if lq2 in self._lhv:
+        if lq2 in self.lhv:
             ctrl_prob = self.sim[hq1[0][0]].prob(hq1[0][1])
-            _cpauli_lhv(ctrl_prob, self._lhv[lq2], pauli, anti)
+            _cpauli_lhv(ctrl_prob, self.lhv[lq2], pauli, anti)
 
         if anc is not None:
             # Decode:
@@ -1785,7 +1793,7 @@ class QrackAceBackend:
             # After we corrected any mismatch above, it's unlikely
             # that we can't post-select no-error on this ancilla.
 
-            anc_sim, anc_idx = self._qubits[anc][0]
+            anc_sim, anc_idx = self.qubits[anc][0]
             p = self.sim[anc_sim].prob(anc_idx)
             if self._ps_epsilon >= (1.0 - p):
                 b = self.m(anc)
@@ -2051,24 +2059,24 @@ class QrackAceBackend:
 
         if sims1.isdisjoint(sims2):
             # Once fully resolved, the swap itself is nothing but a
-            # reference exchange: self._qubits[lq] is a reference to the
+            # reference exchange: self.qubits[lq] is a reference to the
             # replica-list object, so swapping which index points to
             # which object IS the swap -- no separate content to copy.
-            self._qubits[lq1], self._qubits[lq2] = self._qubits[lq2], self._qubits[lq1]
+            self.qubits[lq1], self.qubits[lq2] = self.qubits[lq2], self.qubits[lq1]
 
-            lhv1 = self._lhv.pop(lq1, None)
-            lhv2 = self._lhv.pop(lq2, None)
+            lhv1 = self.lhv.pop(lq1, None)
+            lhv2 = self.lhv.pop(lq2, None)
             if lhv2 is not None:
-                self._lhv[lq1] = lhv2
+                self.lhv[lq1] = lhv2
             if lhv1 is not None:
-                self._lhv[lq2] = lhv1
+                self.lhv[lq2] = lhv1
 
             # Boundary repetition code needs no bookkeeping here, unlike
-            # self._qubits/self._lhv just above: it's on-demand now, not
+            # self.qubits/self.lhv just above: it's on-demand now, not
             # a permanent, per-logical-index dict of pre-allocated
-            # partners -- eligibility is just len(self._qubits[lq]) > 1,
+            # partners -- eligibility is just len(self.qubits[lq]) > 1,
             # computed fresh on every coupling event, so the reference
-            # swap of self._qubits above already, automatically carries
+            # swap of self.qubits above already, automatically carries
             # the right eligibility with it. Nothing else to move.
             return
 
@@ -2193,7 +2201,7 @@ class QrackAceBackend:
                 if found:
                     break
             self._in_gadget_capture = True
-            anc_and = self._detect_ancilla_lq[anc_sim]
+            anc_and = self.detect_ancilla_lq[anc_sim]
             self.cx(t, anc_and)
             # self.mcx() only supports a single control at the logical
             # level (a syntax-convenience wrapper, confirmed directly --
@@ -2212,7 +2220,7 @@ class QrackAceBackend:
             c1_idx = next((r[1] for r in hq1 if r[0] == anc_sim), None)
             c2_idx = next((r[1] for r in hq2 if r[0] == anc_sim), None)
             if (c1_idx is not None) and (c2_idx is not None):
-                _, anc_and_idx = self._qubits[anc_and][0]
+                _, anc_and_idx = self.qubits[anc_and][0]
                 self.sim[anc_sim].mcx([c1_idx, c2_idx], anc_and_idx)
             else:
                 self.ccx(c1, c2, anc_and)
@@ -2293,7 +2301,7 @@ class QrackAceBackend:
 
         if anc_and is not None:
             self.cx(t, anc_and)
-            anc_sim, anc_idx = self._qubits[anc_and][0]
+            anc_sim, anc_idx = self.qubits[anc_and][0]
             p = self.sim[anc_sim].prob(anc_idx)
             p = 1.0 - p
             if self._ps_epsilon >= p:
@@ -2361,7 +2369,7 @@ class QrackAceBackend:
             else:
                 self.sim[b[0]].force_m(b[1], result)
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.reset()
             if result:
@@ -2388,7 +2396,7 @@ class QrackAceBackend:
             else:
                 self.sim[b[0]].force_m(b[1], result)
 
-        lhv = self._lhv.get(lq)
+        lhv = self.lhv.get(lq)
         if lhv is not None:
             lhv.reset()
             if result:
@@ -2785,7 +2793,7 @@ class QrackAceBackend:
         # keep patching individual arithmetic mistakes in a function whose
         # intended row/col semantics were genuinely unclear on inspection,
         # this is grounded directly in the one thing that's true by
-        # construction: self._qubits, the actual replica structure built
+        # construction: self.qubits, the actual replica structure built
         # during __init__. Two logical qubits are coupled if and only if
         # they share ANY simulator id among their own replicas -- this
         # cannot disagree with the real adjacency, because it doesn't
@@ -2794,7 +2802,7 @@ class QrackAceBackend:
         n = self.num_qubits()
         sim_to_qubits = {}
         for lq in range(n):
-            for sim_id, _ in self._qubits[lq]:
+            for sim_id, _ in self.qubits[lq]:
                 sim_to_qubits.setdefault(sim_id, []).append(lq)
         for sim_id, qubits_here in sim_to_qubits.items():
             for a in qubits_here:
@@ -2825,7 +2833,7 @@ class QrackAceBackend:
         # are untouched -- a bulk qubit's single simulator membership
         # was never ambiguous.
         def is_boundary(lq):
-            return len(self._qubits[lq]) > 1
+            return len(self.qubits[lq]) > 1
 
         def same_single_side(idx_a, idx_b, long_range_arr, length):
             if idx_a == idx_b:
@@ -3011,8 +3019,8 @@ class QrackAceBackend:
         noise_model = NoiseModel()
 
         def _uncommon_sim_fraction(lq1, lq2):
-            sims1 = {qb[0] for qb in self._qubits[lq1]}
-            sims2 = {qb[0] for qb in self._qubits[lq2]}
+            sims1 = {qb[0] for qb in self.qubits[lq1]}
+            sims2 = {qb[0] for qb in self.qubits[lq2]}
 
             return len(sims1 ^ sims2) / len(sims1.union(sims2))
 
@@ -3042,7 +3050,7 @@ class QrackAceBackend:
         # nested cx(lq1, anc) capture goes through the full logical
         # coupling machinery (shadow or real, whichever applies) and
         # works the same way regardless. So this is checked directly,
-        # per pair, from len(self._qubits[a]) -- no precomputed set
+        # per pair, from len(self.qubits[a]) -- no precomputed set
         # needed.
 
         # This factor is a theory-derived placeholder, not an empirical
@@ -3088,7 +3096,7 @@ class QrackAceBackend:
             # Pauli-string convention is big-endian relative to the qubit
             # list: the LAST qubit corresponds to the LEFTMOST character).
             p_shadow_ccz = 1 - sp * p
-            if self.is_error_detection and len(self._qubits[a]) > 1:
+            if self.is_error_detection and len(self.qubits[a]) > 1:
                 # a is the control for this pair (_cpauli(lq1=a, lq2=b,
                 # ...) is always called with a as the coupling source).
                 # Both gadget halves that protect this pair (anc1 on a,
@@ -3163,12 +3171,12 @@ class QrackAceBackend:
             # error character isn't captured by this specific derivation;
             # that case keeps the previous symmetric depolarizing
             # treatment below as a fallback.
-            len_a = len(self._qubits[a])
-            len_b = len(self._qubits[b])
+            len_a = len(self.qubits[a])
+            len_b = len(self.qubits[b])
             is_a_simple = len_a == 1
             is_b_simple = len_b == 1
-            sims_a = [qb[0] for qb in self._qubits[a]]
-            sims_b = [qb[0] for qb in self._qubits[b]]
+            sims_a = [qb[0] for qb in self.qubits[a]]
+            sims_b = [qb[0] for qb in self.qubits[b]]
             has_match = any(s in sims_b for s in sims_a)
 
             if (is_a_simple != is_b_simple) and has_match:
@@ -3216,7 +3224,7 @@ class QrackAceBackend:
             # 4-term (I,X,Z,Y) channel down to a plain 2-term (I,Z) one.
             if (is_a_simple != is_b_simple) and has_match:
                 p_cz = 1 - sp * p  # same per-call formula as standalone cz
-                if self.is_error_detection and len(self._qubits[a]) > 1:
+                if self.is_error_detection and len(self.qubits[a]) > 1:
                     p_cz *= d
                 p_net_iswap = p_net_swap * (1 - p_cz) + p_cz * (1 - p_net_swap)
                 if is_a_simple:
