@@ -2170,62 +2170,6 @@ class QrackAceBackend:
             self.mcx([c1, c2], t)
             return
 
-        # AND-invariant, generalized from _apply_coupling's CX/CZ XOR
-        # check to the Toffoli's actual relationship: t should end up as
-        # t_before XOR (c1 AND c2), not just t_before XOR c1 or XOR c2
-        # individually. mcx is the native AND-conditioned flip, so it
-        # plays the same role here that a plain cx(control, anc) played
-        # in the 2-qubit case: capture t's pre-gate value, then fold in
-        # c1 AND c2 via a genuine nested mcx() (which goes through the
-        # same shadow/correct machinery as any other logical gate, so
-        # this is exposed to the same class of intrinsic approximation
-        # error the CX/CZ check catches, not a raw single-replica read).
-        # Uses t's own patch ancilla2 array, since t itself is guaranteed
-        # bulk on this path (the len(hqt) > 1 case returns earlier,
-        # above) and nothing else in this method uses that array anymore.
-        anc_and = None
-        if self.is_error_detection and not self._in_gadget_capture and ((len(hqt) > 1) or (len(hq1) > 1) or (len(hq2) > 1)):
-            found = False
-            anc_sim = hq1[0][0]
-            t_sims = {y[0] for y in hqt if y[0] >= 0}
-            for x in hq1:
-                if (x[0] < 0) or (x[0] not in t_sims):
-                    continue
-                anc_sim = x[0]
-                for y in hq2:
-                    if (y[0] < 0) or (y[0] not in t_sims):
-                        continue
-                    if anc_sim == y[0]:
-                        found = True
-                        break
-                if found:
-                    break
-            self._in_gadget_capture = True
-            anc_and = self.detect_ancilla_lq[anc_sim]
-            self.cx(t, anc_and)
-            # self.mcx() only supports a single control at the logical
-            # level (a syntax-convenience wrapper, confirmed directly --
-            # it raises for 2 controls), so it can't do the AND capture
-            # itself. When c1 and c2 both happen to have a physical
-            # replica in t's own home-patch simulator (the same one
-            # anc_and lives in), use a genuine native mcx there directly
-            # -- exact, and a clean, independent reference to compare the
-            # real Toffoli against. Otherwise, fall back to a recursive
-            # ccx(c1, c2, anc_and): safe from infinite recursion here
-            # specifically because _in_gadget_capture is already True, so
-            # the recursive call's own "not self._in_gadget_capture" gate
-            # skips setting up a second anc_and, and just performs the
-            # ordinary native-witness-or-shadow Toffoli computation on
-            # anc_and instead.
-            c1_idx = next((r[1] for r in hq1 if r[0] == anc_sim), None)
-            c2_idx = next((r[1] for r in hq2 if r[0] == anc_sim), None)
-            if (c1_idx is not None) and (c2_idx is not None):
-                _, anc_and_idx = self.qubits[anc_and][0]
-                self.sim[anc_sim].mcx([c1_idx, c2_idx], anc_and_idx)
-            else:
-                self.ccx(c1, c2, anc_and)
-            self._in_gadget_capture = False
-
         self.correct(c1)
         self.correct(c2)
 
@@ -2296,23 +2240,6 @@ class QrackAceBackend:
                 self.sim[b1[0]].mcx([b1[1], b2[1]], bt[1])
 
         self.correct(t)
-
-        self._in_gadget_capture = True
-
-        if anc_and is not None:
-            self.cx(t, anc_and)
-            anc_sim, anc_idx = self.qubits[anc_and][0]
-            p = self.sim[anc_sim].prob(anc_idx)
-            p = 1.0 - p
-            if self._ps_epsilon >= p:
-                b = self.m(anc_and)
-            else:
-                b = self.force_m(anc_and, False)
-            if b:
-                self.x(anc_and)
-                self.x(t)
-
-        self._in_gadget_capture = False
 
     def ccz(self, c1, c2, t):
         self.h(t)
