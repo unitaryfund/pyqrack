@@ -2197,28 +2197,6 @@ class QrackAceBackend:
             witnesses.append(witness)
 
         if needs_shadow:
-            # Confirmed directly: whenever even one replica of t lacks a
-            # native witness shared with c1 and c2, the per-replica
-            # fallback to _ccx_shadow craters fidelity specifically when
-            # either control is in genuine superposition -- 0.64-0.68
-            # vs. 0.999+ for every other input tested, stable from 100 to
-            # 2500 shots, so not shot noise. Diverting the WHOLE
-            # operation (not just the unwitnessed replica) to the general
-            # 6-CX decomposition instead: every step here is a genuine
-            # logical cx()/h()/t()/adjt() call, which updates every
-            # replica of t through the same _apply_coupling boundary-
-            # crossing machinery already validated elsewhere in this
-            # file, rather than the lower-level per-replica _cx_shadow
-            # calls _ccx_shadow uses for just the unwitnessed ones.
-            #
-            # Wrapped in _in_gadget_capture, same as established earlier:
-            # without it, each individual cx() here would independently
-            # trigger its own XOR-invariant gadget setup, which corrupts
-            # the precise T/Tdg phase relationships this decomposition
-            # depends on (confirmed directly, the first time this
-            # decomposition was used unconditionally -- corrupted even
-            # c1/c2, which the per-replica path never touched at all).
-            self._in_gadget_capture = True
             self.h(t)
             self.cx(c2, t)
             self.adjt(t)
@@ -2234,7 +2212,6 @@ class QrackAceBackend:
             self.t(c1)
             self.adjt(c2)
             self.cx(c1, c2)
-            self._in_gadget_capture = False
         else:
             for (b1, b2, bt) in witnesses:
                 self.sim[b1[0]].mcx([b1[1], b2[1]], bt[1])
