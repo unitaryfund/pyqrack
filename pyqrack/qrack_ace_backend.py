@@ -2229,6 +2229,7 @@ class QrackAceBackend:
                         break
                 if found:
                     break
+            self._in_gadget_capture = True
             anc_and = self.detect_ancilla_lq[anc_sim]
             self.cx(t, anc_and)
             c1_idx = next((r[1] for r in hq1 if r[0] == anc_sim), None)
@@ -2237,9 +2238,8 @@ class QrackAceBackend:
                 _, anc_and_idx = self.qubits[anc_and][0]
                 self.sim[anc_sim].mcx([c1_idx, c2_idx], anc_and_idx)
             else:
-                self._in_gadget_capture = True
                 self.ccx(c1, c2, anc_and)
-                self._in_gadget_capture = False
+            self._in_gadget_capture = False
 
         self.correct(c1)
         self.correct(c2)
@@ -2250,6 +2250,7 @@ class QrackAceBackend:
         self.correct(t)
 
         if anc_and is not None:
+            self._in_gadget_capture = True
             self.cx(t, anc_and)
             anc_sim, anc_idx = self.qubits[anc_and][0]
             p = self.sim[anc_sim].prob(anc_idx)
@@ -2261,6 +2262,7 @@ class QrackAceBackend:
             if b:
                 self.x(anc_and)
                 self.x(t)
+            self._in_gadget_capture = False
 
     def ccz(self, c1, c2, t):
         self.h(t)
