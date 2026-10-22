@@ -429,6 +429,7 @@ class QrackAceBackend:
         # exactly mirroring how every other per-simulator allocation below
         # already guards for "nothing to allocate."
         has_boundary = self.use_crossbars and (boundary_count > 0)
+        self._crossbar_sim = boundary_sim_id if has_boundary else None
         if has_boundary:
             sim_counts.append(boundary_count)
             sim_count += 1
@@ -1603,6 +1604,54 @@ class QrackAceBackend:
 
         return connected, boundary
 
+    def _update_lineage(self, lq1, hq1, lq2, hq2):
+        # Lineage-tracking authority: a replica stays "clean" only while every
+        # coupling it has taken part in was a REAL gate with a clean replica of
+        # the partner. The authority for each participant becomes the clean
+        # replicas that just met a clean partner replica in a shared simulator.
+        # A replica with an unbroken real-gate history holds the qubit's full
+        # coherent state, including entanglement accumulated across several
+        # couplings -- e.g. the shared crossbar simulator, which holds a replica
+        # of every boundary qubit, keeps a seam-to-seam subcircuit fully
+        # coherent across every patch boundary. Only if no clean pair shares a
+        # simulator does it fall back to the plain fresh-copy rule.
+        if (not self.is_boundary_repetition_code) or self._in_gadget_capture or (lq1 is None) or (lq2 is None):
+            return
+        if (len(hq1) < 2) and (len(hq2) < 2):
+            return
+
+        def clean(lq, hq):
+            a = self._authority.get(lq) if len(hq) > 1 else None
+            return set(range(len(hq))) if a is None else set(a)
+
+        c1, c2 = clean(lq1, hq1), clean(lq2, hq2)
+        new1 = {i for i in c1 if any(hq1[i][0] == hq2[j][0] for j in c2)}
+        new2 = {j for j in c2 if any(hq1[i][0] == hq2[j][0] for i in c1)}
+        if not new1:
+            sims2 = {b[0] for b in hq2}
+            new1 = {i for i, b in enumerate(hq1) if b[0] in sims2}
+            sims1 = {b[0] for b in hq1}
+            new2 = {j for j, b in enumerate(hq2) if b[0] in sims1}
+        # When both participants are boundary qubits, their crossbar replicas
+        # (one shared simulator for every boundary qubit in the grid) are the
+        # only copies guaranteed to see the WHOLE seam-to-seam history; copies
+        # in a patch simulator can be left holding a pairwise correlation that
+        # a later coupling elsewhere has made stale. So a clean crossbar pair
+        # becomes the sole authority.
+        cb = self._crossbar_sim
+        if (cb is not None) and (len(hq1) > 1) and (len(hq2) > 1):
+            i_cb = [i for i in new1 if hq1[i][0] == cb]
+            j_cb = [j for j in new2 if hq2[j][0] == cb]
+            if i_cb and j_cb:
+                new1, new2 = set(i_cb), set(j_cb)
+        for lq, hq, new in ((lq1, hq1, new1), (lq2, hq2, new2)):
+            if len(hq) < 2 or not new:
+                continue
+            if len(new) == len(hq):
+                self._authority.pop(lq, None)
+            else:
+                self._authority[lq] = new
+
     def _set_authority(self, lq, hq, partner_hq):
         # Record which replica slot(s) of boundary qubit lq just received a
         # REAL coupling gate (they share a simulator with the partner). See
@@ -1658,8 +1707,7 @@ class QrackAceBackend:
                 gate_fn, shadow_fn = self._get_gate(pauli, anti, sim_id)
                 _, idx2 = hq2[i]
                 gate_fn([idx1], idx2)
-            self._set_authority(lq1, hq1, hq2)
-            self._set_authority(lq2, hq2, hq1)
+            self._update_lineage(lq1, hq1, lq2, hq2)
             return
 
         # Logical-level error-detection gadget: an earlier version of this
@@ -1761,8 +1809,7 @@ class QrackAceBackend:
                     shadow_fn(b1, b2)
                     shadow_targets.append(b2)
 
-        self._set_authority(lq1, hq1, hq2)
-        self._set_authority(lq2, hq2, hq1)
+        self._update_lineage(lq1, hq1, lq2, hq2)
 
         if not self._in_gadget_capture:
             if pauli != Pauli.PauliZ:
